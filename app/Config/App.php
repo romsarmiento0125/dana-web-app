@@ -269,7 +269,7 @@ class App extends BaseConfig
             return $_SERVER['SERVER_NAME'];
         }
 
-        return 'bms.number1';
+        return 'dana-web-app.test';
     }
 
     /**
