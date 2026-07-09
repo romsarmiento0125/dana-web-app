@@ -19,12 +19,13 @@
         }
     </script>
 </head>
-<body class="h-full flex items-center justify-center bg-gray-950">
+<body class="h-full min-h-[100dvh] bg-gray-950">
 
-    <div class="w-full max-w-sm px-6">
+    <div class="flex min-h-[100dvh] items-center justify-center px-4 py-8 sm:px-6">
+    <div class="w-full max-w-sm">
 
         <!-- Logo / Brand -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-6 sm:mb-8">
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4">
                 <!-- Sparkle icon -->
                 <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
@@ -48,7 +49,7 @@
         <?php endif; ?>
 
         <!-- Login Card -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-2xl sm:p-6">
             <form action="/login" method="POST" class="space-y-4" novalidate>
                 <?= csrf_field() ?>
 
@@ -62,8 +63,8 @@
                         required
                         autocomplete="username"
                         placeholder="your_username"
-                        class="w-full rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500
-                               px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                           class="w-full rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500
+                               px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                transition"
                     >
                 </div>
@@ -77,16 +78,16 @@
                         required
                         autocomplete="current-password"
                         placeholder="••••••••"
-                        class="w-full rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500
-                               px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                           class="w-full rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500
+                               px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                                transition"
                     >
                 </div>
 
                 <button
                     type="submit"
-                    class="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500
-                           text-white font-semibold text-sm px-4 py-2.5 transition focus:outline-none
+                          class="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500
+                              text-white font-semibold text-sm px-4 py-3 transition focus:outline-none
                            focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
                 >
                     Sign in
@@ -97,7 +98,8 @@
             </form>
         </div>
 
-        <p class="mt-6 text-center text-xs text-gray-600">Dana AI &copy; <?= date('Y') ?></p>
+        <p class="mt-5 text-center text-xs text-gray-600 sm:mt-6">Dana AI &copy; <?= date('Y') ?></p>
+    </div>
     </div>
 
 </body>

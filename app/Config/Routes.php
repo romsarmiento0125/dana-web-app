@@ -17,6 +17,23 @@ $routes->get('/logout', 'AuthController::logout');
 $routes->get('/dashboard', 'ChatController::dashboard', ['filter' => 'auth']);
 
 // ---------------------------------------------------------------------------
+// User admin routes (direct URL access only)
+// ---------------------------------------------------------------------------
+$routes->group('useradmin', ['filter' => ['auth', 'adminrole']], static function (RouteCollection $routes) {
+    $routes->get('login', 'UserAdminController::loginForm');
+    $routes->post('login', 'UserAdminController::login');
+});
+
+$routes->group('useradmin', ['filter' => ['auth', 'adminrole', 'adminreauth']], static function (RouteCollection $routes) {
+    $routes->get('/', 'UserAdminController::index');
+    $routes->post('users', 'UserAdminController::create');
+    $routes->get('users/(:num)/edit', 'UserAdminController::edit/$1');
+    $routes->post('users/(:num)', 'UserAdminController::update/$1');
+    $routes->post('users/(:num)/password', 'UserAdminController::changePassword/$1');
+    $routes->post('users/(:num)/delete', 'UserAdminController::delete/$1');
+});
+
+// ---------------------------------------------------------------------------
 // Protected API routes
 // ---------------------------------------------------------------------------
 $routes->group('api', ['filter' => 'auth'], static function (RouteCollection $routes) {

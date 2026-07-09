@@ -19,7 +19,8 @@ class CreateAdminUser extends Seeder
     {
         $data = [
             'username'      => 'admin',
-            'password_hash' => password_hash('admin', PASSWORD_BCRYPT),
+            'password_hash' => password_hash('changeme123', PASSWORD_BCRYPT),
+            'role'          => 'admin',
             'created_at'    => date('Y-m-d H:i:s'),
         ];
 
@@ -33,7 +34,10 @@ class CreateAdminUser extends Seeder
             $this->db->table('users')->insert($data);
             echo "Admin user created. Username: admin / Password: changeme123\n";
         } else {
-            echo "Admin user already exists — skipping.\n";
+            $this->db->table('users')
+                ->where('username', $data['username'])
+                ->update(['role' => 'admin']);
+            echo "Admin user already exists — ensured role is admin.\n";
         }
     }
 }

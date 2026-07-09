@@ -49,9 +49,11 @@ class AuthController extends BaseController
         session()->regenerate(true);
 
         session()->set([
-            'user_id'   => $user['id'],
-            'username'  => $user['username'],
-            'logged_in' => true,
+            'user_id'            => $user['id'],
+            'username'           => $user['username'],
+            'user_role'          => $user['role'] ?? 'user',
+            'logged_in'          => true,
+            'admin_reauth_until' => null,
         ]);
 
         return redirect()->to('/dashboard');
