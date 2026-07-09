@@ -15,10 +15,7 @@ class ChatController extends BaseController
 
     public function __construct()
     {
-        $this->n8nWebhookUrl = (string) env(
-            'n8n.webhookUrl',
-            'https://n8n.rps-home-lab.com/webhook/36b8a40e-1bd2-448b-a85a-523b979d4c4b/chat'
-        );
+        $this->n8nWebhookUrl = trim((string) env('n8n.webhookUrl'));
     }
 
     // -----------------------------------------------------------------------
@@ -182,6 +179,12 @@ class ChatController extends BaseController
      */
     private function callN8nWebhook(string $conversationId, int $userId, string $message): string
     {
+        if ($this->n8nWebhookUrl === '') {
+            log_message('error', '[Dana] Missing n8n.webhookUrl in environment configuration.');
+
+            return 'I\'m sorry, I\'m currently unavailable due to a configuration issue. Please try again later.';
+        }
+
         try {
             $client   = \Config\Services::curlrequest();
             $response = $client->post($this->n8nWebhookUrl, [
