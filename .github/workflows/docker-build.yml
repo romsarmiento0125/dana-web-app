@@ -1,0 +1,89 @@
+name: 🐳 Build & Push Docker Image
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches:
+      - main        # triggers on push to main
+      - master      # also support older repos named master
+  pull_request:
+    branches:
+      - main
+      - master
+
+# ── Permissions ───────────────────────────────────────────────────────────────
+permissions:
+  contents: read
+  packages: write
+
+# ── Jobs ──────────────────────────────────────────────────────────────────────
+jobs:
+  build-and-push:
+    name: Build & Push to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout your source code
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Set up QEMU for multi-platform builds (arm64 support for Linux servers)
+      - name: 🔧 Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 3. Set up Docker Buildx for advanced builds
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 4. Log in to Docker Hub using secrets you'll set in GitHub
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 5. Generate Docker metadata (tags and labels automatically)
+      - name: 🏷️ Generate Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/dana-web-app
+          tags: |
+            # Tag with branch name (e.g. main, master)
+            type=ref,event=branch
+            # Tag with git short SHA (e.g. sha-a1b2c3d)
+            type=sha,prefix=sha-
+            # Always push a "latest" tag on main/master
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+
+      # 6. Build and push the image
+      - name: 🚀 Build & Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          # Build for both amd64 (standard servers) and arm64 (Raspberry Pi, Apple M1)
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache layers to speed up future builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 7. Print summary
+      - name: ✅ Build Summary
+        run: |
+          echo "## 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image pushed successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tags pushed:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To pull on your server:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dana-web-app:latest" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

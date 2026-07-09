@@ -1,0 +1,91 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DANA Web App - Docker Compose
+# Run with: docker compose up -d
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PHP/Apache Application ──────────────────────────────────────────────────
+  app:
+    image: ${DOCKER_IMAGE:-romsarmiento0125/dana-web-app}:${IMAGE_TAG:-latest}
+    container_name: dana_app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      # ── CodeIgniter 4 Settings ──────────────────────────────────────────────
+      CI_ENVIRONMENT: production
+
+      # ── Database Connection ─────────────────────────────────────────────────
+      # These override values in .env inside the container
+      database.default.hostname: db
+      database.default.database: ${DB_NAME:-dana}
+      database.default.username: ${DB_USER:-dana_user}
+      database.default.password: ${DB_PASSWORD:-change_me_in_production}
+      database.default.DBDriver: MySQLi
+      database.default.port: 3306
+
+      # ── N8N Webhook URL ─────────────────────────────────────────────────────
+      # Replace this with your actual n8n webhook URL
+      n8n.webhookUrl: "${N8N_WEBHOOK_URL:-https://n8n.rps-home-lab.com/webhook/101809c7-c6bf-4a4b-8b20-0896583f6c4f/chat}"
+
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dana_network
+    volumes:
+      # Persist writable folder (logs, cache, uploads)
+      - dana_writable:/var/www/html/writable
+
+  # ── MySQL Database ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: dana_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-dana}
+      MYSQL_USER: ${DB_USER:-dana_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_root_password_too}
+    volumes:
+      - dana_db_data:/var/lib/mysql
+      # Optional: put .sql init scripts here and they run on first start
+      # - ./docker/init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-change_root_password_too}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dana_network
+
+  # ── phpMyAdmin (optional, comment out in production if not needed) ──────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: dana_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USER:-dana_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
+    depends_on:
+      - db
+    networks:
+      - dana_network
+
+# ── Named Volumes ─────────────────────────────────────────────────────────────
+volumes:
+  dana_db_data:
+    driver: local
+  dana_writable:
+    driver: local
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  dana_network:
+    driver: bridge

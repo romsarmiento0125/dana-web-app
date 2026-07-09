@@ -1,0 +1,40 @@
+# ── Git ───────────────────────────────────────────────────────────────────────
+.git
+.gitignore
+.github
+
+# ── Dev/IDE ───────────────────────────────────────────────────────────────────
+.vscode
+.idea
+*.sublime-*
+.DS_Store
+Thumbs.db
+
+# ── Environment files (secrets never go in image) ────────────────────────────
+.env
+.env.*
+!.env.docker
+
+# ── Tests (not needed in production image) ────────────────────────────────────
+tests/
+phpunit.dist.xml
+phpunit.xml
+
+# ── Build artifacts ───────────────────────────────────────────────────────────
+builds/
+
+# ── Docs ─────────────────────────────────────────────────────────────────────
+README.md
+LICENSE
+
+# ── Temporary/cache files ─────────────────────────────────────────────────────
+writable/cache/*
+writable/logs/*
+writable/session/*
+writable/debugbar/*
+*.log
+
+# ── Vendor (built inside Docker via composer) ────────────────────────────────
+# NOTE: vendor/ IS included because we copy it from the composer stage
+# If you want to rebuild inside Docker, uncomment the line below:
+# vendor/
