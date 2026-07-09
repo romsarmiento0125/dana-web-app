@@ -7,12 +7,15 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 
 # Install production dependencies only (no dev)
+# --ignore-platform-reqs: the composer stage image doesn't have all PHP extensions
+# (intl, gd, zip, etc.) — they exist in the final php:8.2-apache runtime image.
 RUN composer install \
     --no-dev \
     --no-interaction \
     --no-progress \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --ignore-platform-reqs
 
 # ── Stage 2: Final runtime image ─────────────────────────────────────────────
 FROM php:8.2-apache
