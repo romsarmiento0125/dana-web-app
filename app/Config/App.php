@@ -11,16 +11,21 @@ class App extends BaseConfig
      * Base Site URL
      * --------------------------------------------------------------------------
      *
-     * This is set dynamically in the __construct() method below.
-     * It detects the correct URL based on trusted proxy headers and a
-     * whitelist of allowed hosts to prevent Host Header Injection attacks.
+     * URL to your CodeIgniter root. Typically, this will be your base URL,
+     * WITH a trailing slash:
      *
-     * IMPORTANT: Make sure 'app.baseURL' is COMMENTED OUT in your .env file!
+     * E.g., http://example.com/
      */
-    public string $baseURL = 'http://dana-web-app.test/';
+    public string $baseURL = 'http://192.168.0.3/';
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
+     * If you want to accept multiple Hostnames, set this.
+     *
+     * E.g.,
+     * When your site URL ($baseURL) is 'http://example.com/', and your site
+     * also accepts 'http://media.example.com/' and 'http://accounts.example.com/':
+     *     ['media.example.com', 'accounts.example.com']
      *
      * @var list<string>
      */
@@ -31,14 +36,26 @@ class App extends BaseConfig
      * Index File
      * --------------------------------------------------------------------------
      *
-     * Empty string because Nginx handles URL rewriting (no index.php in URLs).
+     * Typically, this will be your `index.php` file, unless you've renamed it to
+     * something else. If you have configured your web server to remove this file
+     * from your site URIs, set this variable to an empty string.
      */
-    public string $indexPage = '';
+    public string $indexPage = 'index.php';
 
     /**
      * --------------------------------------------------------------------------
-     * URI Protocol
+     * URI PROTOCOL
      * --------------------------------------------------------------------------
+     *
+     * This item determines which server global should be used to retrieve the
+     * URI string. The default setting of 'REQUEST_URI' works for most servers.
+     * If your links do not seem to work, try one of the other delicious flavors:
+     *
+     *  'REQUEST_URI': Uses $_SERVER['REQUEST_URI']
+     * 'QUERY_STRING': Uses $_SERVER['QUERY_STRING']
+     *    'PATH_INFO': Uses $_SERVER['PATH_INFO']
+     *
+     * WARNING: If you set this to 'PATH_INFO', URIs will always be URL-decoded!
      */
     public string $uriProtocol = 'REQUEST_URI';
 
@@ -70,6 +87,11 @@ class App extends BaseConfig
      * --------------------------------------------------------------------------
      * Default Locale
      * --------------------------------------------------------------------------
+     *
+     * The Locale roughly represents the language and location that your visitor
+     * is viewing the site from. It affects the language strings and other
+     * strings (like currency markers, numbers, etc), that your program
+     * should run under for this request.
      */
     public string $defaultLocale = 'en';
 
@@ -77,6 +99,11 @@ class App extends BaseConfig
      * --------------------------------------------------------------------------
      * Negotiate Locale
      * --------------------------------------------------------------------------
+     *
+     * If true, the current Request object will automatically determine the
+     * language to use based on the value of the Accept-Language header.
+     *
+     * If false, no automatic detection will be performed.
      */
     public bool $negotiateLocale = false;
 
@@ -84,6 +111,12 @@ class App extends BaseConfig
      * --------------------------------------------------------------------------
      * Supported Locales
      * --------------------------------------------------------------------------
+     *
+     * If $negotiateLocale is true, this array lists the locales supported
+     * by the application in descending order of priority. If no match is
+     * found, the first locale will be used.
+     *
+     * IncomingRequest::setLocale() also uses this list.
      *
      * @var list<string>
      */
@@ -94,7 +127,11 @@ class App extends BaseConfig
      * Application Timezone
      * --------------------------------------------------------------------------
      *
-     * @see https://www.php.net/manual/en/timezones.php
+     * The default timezone that will be used in your application to display
+     * dates with the date helper, and can be retrieved through app_timezone()
+     *
+     * @see https://www.php.net/manual/en/timezones.php for list of timezones
+     *      supported by PHP.
      */
     public string $appTimezone = 'UTC';
 
@@ -102,6 +139,9 @@ class App extends BaseConfig
      * --------------------------------------------------------------------------
      * Default Character Set
      * --------------------------------------------------------------------------
+     *
+     * This determines which character set is used by default in various methods
+     * that require a character set to be provided.
      *
      * @see http://php.net/htmlspecialchars for a list of supported charsets.
      */
@@ -112,8 +152,10 @@ class App extends BaseConfig
      * Force Global Secure Requests
      * --------------------------------------------------------------------------
      *
-     * Set to false because our internal Docker network uses HTTP.
-     * If you add HTTPS via Let's Encrypt later, set this to true.
+     * If true, this will force every request made to this application to be
+     * made via a secure connection (HTTPS). If the incoming request is not
+     * secure, the user will be redirected to a secure version of the page
+     * and the HTTP Strict Transport Security (HSTS) header will be set.
      */
     public bool $forceGlobalSecureRequests = false;
 
@@ -122,251 +164,39 @@ class App extends BaseConfig
      * Reverse Proxy IPs
      * --------------------------------------------------------------------------
      *
-     * Trust the entire 'shared-infra' Docker network (172.30.0.0/16).
-     * This allows CI4 to correctly read the X-Forwarded-For header from Nginx
-     * to determine the real visitor IP address.
+     * If your server is behind a reverse proxy, you must whitelist the proxy
+     * IP addresses from which CodeIgniter should trust headers such as
+     * X-Forwarded-For or Client-IP in order to properly identify
+     * the visitor's IP address.
      *
-     * NOTE: CI4 uses this property specifically for client IP detection.
-     * The value must be a SINGLE header name (not comma-separated).
-     * Our custom detectHost/detectScheme/detectPort methods handle the
-     * other X-Forwarded-* headers independently.
+     * You need to set a proxy IP address or IP address with subnets and
+     * the HTTP header for the client IP address.
+     *
+     * Here are some examples:
+     *     [
+     *         '10.0.1.200'     => 'X-Forwarded-For',
+     *         '192.168.5.0/24' => 'X-Real-IP',
+     *     ]
      *
      * @var array<string, string>
      */
-    public array $proxyIPs = [
-        '0.0.0.0/0' => 'X-Forwarded-For',
-    ];
+    public array $proxyIPs = [];
 
     /**
      * --------------------------------------------------------------------------
      * Content Security Policy
      * --------------------------------------------------------------------------
+     *
+     * Enables the Response's Content Secure Policy to restrict the sources that
+     * can be used for images, scripts, CSS files, audio, video, etc. If enabled,
+     * the Response object will populate default values for the policy from the
+     * `ContentSecurityPolicy.php` file. Controllers can always add to those
+     * restrictions at run time.
+     *
+     * For a better understanding of CSP, see these documents:
+     *
+     * @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/
+     * @see http://www.w3.org/TR/CSP/
      */
     public bool $CSPEnabled = false;
-
-    // =========================================================================
-    // DYNAMIC BASE URL LOGIC
-    // =========================================================================
-
-    /**
-     * Whitelist of trusted hostnames.
-     * Any Host header NOT in this list will be rejected and the
-     * default fallback URL will be used instead.
-     *
-     * @var list<string>
-     */
-    private array $trustedHosts = [
-        'dana-web-app.test',
-        '192.168.0.3',
-    ];
-
-    /**
-     * Default fallback URL used when:
-     * - Running in CLI mode (e.g., `php spark`)
-     * - An untrusted/spoofed Host header is detected
-     */
-    private string $defaultBaseURL = 'http://dana-web-app.test/';
-
-    /**
-     * --------------------------------------------------------------------------
-     * Constructor - Dynamic Base URL Detection
-     * --------------------------------------------------------------------------
-     *
-     * Sets $baseURL dynamically based on the incoming request.
-     * Uses X-Forwarded-* headers (set by the Nginx reverse proxy) and
-     * validates the host against a whitelist to prevent Host Header Injection.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        // -----------------------------------------------------------------
-        // Step 1: CLI Detection
-        // -----------------------------------------------------------------
-        if ($this->isCli()) {
-            $this->baseURL = $this->defaultBaseURL;
-            return;
-        }
-
-        // -----------------------------------------------------------------
-        // Step 2: Determine the Host
-        // -----------------------------------------------------------------
-        $host = $this->detectHost();
-
-        // -----------------------------------------------------------------
-        // Step 3: Strip port from host (e.g., "192.168.0.3:8082" → "192.168.0.3")
-        // -----------------------------------------------------------------
-        $hostWithoutPort = $this->stripPort($host);
-
-        // -----------------------------------------------------------------
-        // Step 4: Security Check — validate against trusted hosts whitelist
-        // -----------------------------------------------------------------
-        if (! $this->isHostTrusted($hostWithoutPort)) {
-            log_message(
-                'warning',
-                'App::__construct() - Untrusted Host header detected: "{host}". Falling back to default.',
-                ['host' => $host]
-            );
-            $this->baseURL = $this->defaultBaseURL;
-            return;
-        }
-
-        // -----------------------------------------------------------------
-        // Step 5: Determine the Protocol (scheme)
-        // -----------------------------------------------------------------
-        $scheme = $this->detectScheme();
-
-        // -----------------------------------------------------------------
-        // Step 6: Determine the Port
-        // -----------------------------------------------------------------
-        $port = $this->detectPort($scheme);
-
-        // -----------------------------------------------------------------
-        // Step 7: Build the final baseURL
-        // -----------------------------------------------------------------
-        $portSuffix = $this->buildPortSuffix($scheme, $port);
-
-        $this->baseURL = "{$scheme}://{$hostWithoutPort}{$portSuffix}/";
-    }
-
-    // =========================================================================
-    // PRIVATE HELPER METHODS
-    // =========================================================================
-
-    /**
-     * Detect if the application is running in CLI mode.
-     */
-    private function isCli(): bool
-    {
-        return defined('STDIN')
-            || php_sapi_name() === 'cli'
-            || ! isset($_SERVER['HTTP_HOST']);
-    }
-
-    /**
-     * Detect the hostname from headers/server variables.
-     *
-     * Priority:
-     *   1. X-Forwarded-Host (set by Nginx proxy_pass)
-     *   2. HTTP_HOST (direct access, may include port)
-     *   3. SERVER_NAME (fallback)
-     *   4. Default fallback host
-     */
-    private function detectHost(): string
-    {
-        if (! empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            // X-Forwarded-Host may contain multiple hosts (comma-separated)
-            // when there are chained proxies. Use the first one.
-            $hosts = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
-            return trim($hosts[0]);
-        }
-
-        if (! empty($_SERVER['HTTP_HOST'])) {
-            return $_SERVER['HTTP_HOST'];
-        }
-
-        if (! empty($_SERVER['SERVER_NAME'])) {
-            return $_SERVER['SERVER_NAME'];
-        }
-
-        return 'dana-web-app.test';
-    }
-
-    /**
-     * Strip port number from a host string.
-     * Handles IPv6 addresses like [::1]:8080 and IPv4 like 192.168.0.3:8082.
-     */
-    private function stripPort(string $host): string
-    {
-        // Handle IPv6 addresses like [::1]:8080
-        if (str_contains($host, ']')) {
-            return preg_replace('/\]:\d+$/', ']', $host) ?? $host;
-        }
-
-        return strtok($host, ':') ?: $host;
-    }
-
-    /**
-     * Check if a host (without port) is in the trusted whitelist.
-     * Comparison is case-insensitive.
-     */
-    private function isHostTrusted(string $host): bool
-    {
-        return in_array(
-            strtolower($host),
-            array_map('strtolower', $this->trustedHosts),
-            true
-        );
-    }
-
-    /**
-     * Detect the URL scheme (http or https).
-     *
-     * Priority:
-     *   1. X-Forwarded-Proto (set by Nginx)
-     *   2. HTTPS server variable
-     *   3. Default to 'http'
-     */
-    private function detectScheme(): string
-    {
-        if (! empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-            // May be comma-separated when chained through multiple proxies.
-            return strtolower(trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]));
-        }
-
-        if (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            return 'https';
-        }
-
-        return 'http';
-    }
-
-    /**
-     * Detect the port number.
-     *
-     * Priority:
-     *   1. X-Forwarded-Port (set by Nginx)
-     *   2. SERVER_PORT
-     *   3. Default based on scheme (80/443)
-     */
-    private function detectPort(string $scheme): int
-    {
-        // 1. Check for our custom Docker-injected external port
-        if (! empty($_SERVER['MY_EXTERNAL_PORT'])) {
-            return (int) $_SERVER['MY_EXTERNAL_PORT'];
-        }
-    
-        // 2. Check X-Forwarded-Port (set by proxy/tunnel)
-        if (! empty($_SERVER['HTTP_X_FORWARDED_PORT'])) {
-            return (int) trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PORT'])[0]);
-        }
-    
-        // 3. If behind a proxy/tunnel (X-Forwarded-Proto is set),
-        //    use the standard port for the detected scheme.
-        //    This prevents appending :80 to HTTPS URLs when Cloudflare
-        //    terminates TLS and forwards over plain HTTP internally.
-        if (! empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-            return ($scheme === 'https') ? 443 : 80;
-        }
-    
-        // 4. Fallback to standard detection
-        if (! empty($_SERVER['SERVER_PORT'])) {
-            return (int) $_SERVER['SERVER_PORT'];
-        }
-    
-        return ($scheme === 'https') ? 443 : 80;
-    }
-
-    /**
-     * Build the port suffix string for the URL.
-     * Returns empty string for standard ports (80 for http, 443 for https).
-     */
-    private function buildPortSuffix(string $scheme, int $port): string
-    {
-        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
-            return '';
-        }
-
-        return ":{$port}";
-    }
 }
