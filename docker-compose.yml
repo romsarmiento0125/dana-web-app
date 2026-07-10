@@ -14,30 +14,9 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-8080}:80"
-    environment:
-      # ── CodeIgniter 4 Settings ──────────────────────────────────────────────
-      CI_ENVIRONMENT: production
-
-      # ── Database Connection ─────────────────────────────────────────────────
-      # These override values in .env inside the container
-      database.default.hostname: db
-      database.default.database: ${DB_NAME:-dana}
-      database.default.username: ${DB_USER:-dana_user}
-      database.default.password: ${DB_PASSWORD:-change_me_in_production}
-      database.default.DBDriver: MySQLi
-      database.default.port: 3306
-      DB_HOST: db
-      DB_NAME: ${DB_NAME:-dana}
-      DB_USER: ${DB_USER:-dana_user}
-      DB_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
-      DB_PORT: 3306
-
-      # ── Startup Behavior ───────────────────────────────────────────────────
-      RUN_MIGRATIONS: "true"
-
-      # ── N8N Webhook URL ─────────────────────────────────────────────────────
-      # Replace this with your actual n8n webhook URL
-      n8n.webhookUrl: "${N8N_WEBHOOK_URL:-}"
+    env_file:
+      - ./docker/env/app.env
+      - ./docker/env/database.env
 
     depends_on:
       db:
@@ -53,17 +32,14 @@ services:
     image: mysql:8.0
     container_name: dana_db
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_NAME:-dana}
-      MYSQL_USER: ${DB_USER:-dana_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_root_password_too}
+    env_file:
+      - ./docker/env/database.env
     volumes:
       - dana_db_data:/var/lib/mysql
       # Optional: put .sql init scripts here and they run on first start
       # - ./docker/init-db:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-change_root_password_too}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -77,10 +53,8 @@ services:
     restart: unless-stopped
     ports:
       - "${PMA_PORT:-8081}:80"
-    environment:
-      PMA_HOST: db
-      PMA_USER: ${DB_USER:-dana_user}
-      PMA_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
+    env_file:
+      - ./docker/env/phpmyadmin.env
     depends_on:
       - db
     networks:

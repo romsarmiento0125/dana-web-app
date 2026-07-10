@@ -15,7 +15,7 @@ class ChatController extends BaseController
 
     public function __construct()
     {
-        $this->n8nWebhookUrl = trim((string) env('n8n.webhookUrl'));
+        $this->n8nWebhookUrl = trim((string) env('n8n.webhookUrl', env('N8N_WEBHOOK_URL', '')));
     }
 
     // -----------------------------------------------------------------------
