@@ -71,6 +71,11 @@ RUN chown -R www-data:www-data /var/www/html/writable \
 # Copy PHP config for production optimizations
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Startup script: fix writable permissions on mounted volumes and run migrations.
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 80
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]

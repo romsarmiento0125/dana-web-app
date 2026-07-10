@@ -194,6 +194,17 @@ class Database extends Config
     {
         parent::__construct();
 
+        // Allow container/server environment variables to override DB settings.
+        $this->default['hostname'] = env('database.default.hostname', env('DB_HOST', $this->default['hostname']));
+        $this->default['username'] = env('database.default.username', env('DB_USER', $this->default['username']));
+        $this->default['password'] = env('database.default.password', env('DB_PASSWORD', $this->default['password']));
+        $this->default['database'] = env('database.default.database', env('DB_NAME', $this->default['database']));
+        $this->default['DBDriver'] = env('database.default.DBDriver', $this->default['DBDriver']);
+        $this->default['charset']  = env('database.default.charset', $this->default['charset']);
+        $this->default['DBCollat'] = env('database.default.DBCollat', $this->default['DBCollat']);
+        $this->default['DBDebug']  = (bool) env('database.default.DBDebug', ENVIRONMENT !== 'production');
+        $this->default['port']     = (int) env('database.default.port', env('DB_PORT', $this->default['port']));
+
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
         // we don't overwrite live data on accident.

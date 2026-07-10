@@ -34,7 +34,16 @@ class AuthController extends BaseController
         }
 
         $userModel = new UserModel();
-        $user      = $userModel->findByUsername($username);
+
+        try {
+            $user = $userModel->findByUsername($username);
+        } catch (\Throwable $e) {
+            log_message('critical', '[Auth] Login query failed: {message}', ['message' => $e->getMessage()]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Login is temporarily unavailable. Please contact support or try again later.');
+        }
 
         // Use constant-time comparison to prevent timing attacks
         $hashToVerify = $user['password_hash'] ?? '$2y$10$invalidhashpadding00000000000000000000000000000000000000';

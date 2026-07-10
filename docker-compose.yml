@@ -26,6 +26,14 @@ services:
       database.default.password: ${DB_PASSWORD:-change_me_in_production}
       database.default.DBDriver: MySQLi
       database.default.port: 3306
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-dana}
+      DB_USER: ${DB_USER:-dana_user}
+      DB_PASSWORD: ${DB_PASSWORD:-change_me_in_production}
+      DB_PORT: 3306
+
+      # ── Startup Behavior ───────────────────────────────────────────────────
+      RUN_MIGRATIONS: "true"
 
       # ── N8N Webhook URL ─────────────────────────────────────────────────────
       # Replace this with your actual n8n webhook URL
