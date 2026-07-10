@@ -37,7 +37,7 @@ services:
 
       # ── N8N Webhook URL ─────────────────────────────────────────────────────
       # Replace this with your actual n8n webhook URL
-      n8n.webhookUrl: "${N8N_WEBHOOK_URL:-https://n8n.rps-home-lab.com/webhook/101809c7-c6bf-4a4b-8b20-0896583f6c4f/chat}"
+      n8n.webhookUrl: "${N8N_WEBHOOK_URL:-}"
 
     depends_on:
       db:

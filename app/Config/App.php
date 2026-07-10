@@ -157,7 +157,8 @@ class App extends BaseConfig
      */
     private array $trustedHosts = [
         'dana-web-app.test',
-        '192.168.0.3'
+        '192.168.0.3',
+        '192.168.0.2'
     ];
 
     /**
